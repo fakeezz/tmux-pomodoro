@@ -64,7 +64,7 @@ pomodoro_status() {
   local pomodoro_state="$(get_tmux_option "@pomodoro_state")"
 
   if [[ $pomodoro_state = "active" ]]; then
-    echo "$(_display_progress)"
+    echo "#[fg=red]🍅#[fg=default]$(_display_progress)"
   fi
 }
 
