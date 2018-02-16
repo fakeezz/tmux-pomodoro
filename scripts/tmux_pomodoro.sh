@@ -4,14 +4,21 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$CURRENT_DIR/helpers.sh"
 
+pomodoro_fg_color=""
+pomodoro_fg_color_default="#[fg=blue]"
+pomodoro_duration=""
+pomodoro_duration_default=$((25*60))
+pomodoro_play=""
+pomodoro_play_default=0
+
 _get_current_time_stamp() {
   echo "`python -c 'import time; print int(time.time())'`"
 }
 
 _display_progress() {
-  local filled_glyph='#[fg=blue]█#[fg=default]'
-  local empty_glyph='#[fg=blue]░#[fg=default]'
-  local active_glyph='#[fg=blue]▒#[fg=default]'
+  local filled_glyph="$(get_tmux_option "@pomodoro_fg_color" "$pomodoro_fg_color_default")█#[fg=default]"
+  local empty_glyph="$(get_tmux_option "@pomodoro_fg_color" "$pomodoro_fg_color_default")░#[fg=default]"
+  local active_glyph="$(get_tmux_option "@pomodoro_fg_color" "$pomodoro_fg_color_default")▒#[fg=default]"
 
   local end_time="$(get_tmux_option "@pomodoro_end_at")"
   local current_time="$(_get_current_time_stamp)"
@@ -43,7 +50,7 @@ _display_progress() {
 pomodoro_start() {
   tmux display-message "POMODORO started"
   local current_time=$(_get_current_time_stamp)
-  local pomodoro_duration="$((25*60))" # duration is 25 minutes by default
+  local pomodoro_duration="$(get_tmux_option "@pomodoro_duration" "$pomodoro_duration_default")" # duration is 25 minutes by default
   local end_time="$(( $current_time + $pomodoro_duration ))"
 
   set_tmux_option "@pomodoro_state" "active"
@@ -56,6 +63,12 @@ pomodoro_stop() {
   tmux display-message "POMODORO stopped"
   set_tmux_option "@pomodoro_state" "inactive"
   set_tmux_option "@pomodoro_end_at" ""
+
+  local play_sound=$(get_tmux_option "@pomodoro_play" "$pomodoro_play_default")
+
+  if [[ $play_sound == "on" ]]; then
+    paplay $CURRENT_DIR/pomodoro.ogg
+  fi
 
   tmux refresh-client -S
 }
