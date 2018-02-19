@@ -10,6 +10,13 @@ pomodoro_duration=""
 pomodoro_duration_default=$((25*60))
 pomodoro_play=""
 pomodoro_play_default=0
+pomodoro_player=""
+
+case $OSTYPE in
+  linux-gnu) pomodoro_player_default="paplay";;
+  darwin*) pomodoro_player_default="afplay";;
+  *) pomodoro_player_default="";;
+esac
 
 _get_current_time_stamp() {
   echo "`python -c 'import time; print int(time.time())'`"
@@ -67,10 +74,16 @@ pomodoro_stop() {
   local play_sound=$(get_tmux_option "@pomodoro_play" "$pomodoro_play_default")
 
   if [[ $play_sound == "on" ]]; then
-    paplay $CURRENT_DIR/pomodoro.ogg
+    pomodoro_play
   fi
 
   tmux refresh-client -S
+}
+
+pomodoro_play() {
+  local filepath=$CURRENT_DIR/pomodoro.ogg
+  local player=$(get_tmux_option "@pomodoro_player" "$pomodoro_player_default")
+  $player $filepath
 }
 
 pomodoro_status() {
