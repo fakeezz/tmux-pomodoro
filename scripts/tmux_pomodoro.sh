@@ -19,7 +19,7 @@ case $OSTYPE in
 esac
 
 _get_current_time_stamp() {
-  echo "`python -c 'import time; print int(time.time())'`"
+  echo "`python -c 'import time; print(int(time.time()))'`"
 }
 
 _display_progress() {
